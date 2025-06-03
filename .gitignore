@@ -31,6 +31,12 @@ Temporary Items
 # Build artifacts
 *.alfredworkflow
 workflow_temp/
+simple_test/
+
+# Build scripts (for local testing)
+build_local.sh
+build_fixed.sh
+test_simple.sh
 
 # Logs
 *.log

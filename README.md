@@ -1,9 +1,8 @@
 # Quick Timezone Changer for Alfred
 
-[![Release](https://img.shields.io/github/v/release/deletosh/alfred-timezone-changer)](https://github.com/deletosh/alfred-timezone-changer/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/deletosh/alfred-timezone-changer/total)](https://github.com/deletosh/alfred-timezone-changer/releases)
-
 Quickly change your Mac's timezone with a simple Alfred command and get instant notification feedback.
+
+![](https://i.imgur.com/7soGkXu.png)
 
 ## Download
 
@@ -17,40 +16,37 @@ Quickly change your Mac's timezone with a simple Alfred command and get instant 
 
 ## Usage
 
-Type `tz` followed by your desired timezone:
+Type `tz` to bring up the timezone selector, then start typing to filter timezones:
 
-- `tz America/New_York` - Switch to Eastern Time
-- `tz Europe/London` - Switch to GMT/BST
-- `tz Asia/Tokyo` - Switch to Japan Time
-- `tz America/Los_Angeles` - Switch to Pacific Time
-- `tz Australia/Sydney` - Switch to Australian Eastern Time
+- `tz` → Shows a searchable list of all available timezones
+- Start typing to filter (e.g., `tz new york`, `tz london`, `tz tokyo`)
+- Select a timezone to switch to it immediately
 
-### Common Timezone Examples:
-```
-# US Timezones
-tz America/New_York        # Eastern
-tz America/Chicago         # Central  
-tz America/Denver          # Mountain
-tz America/Los_Angeles     # Pacific
+### Popular Timezones:
+The workflow will remember your most frequently used timezones and show them at the top of the list for quick access.
 
-# European Timezones
-tz Europe/London           # GMT/BST
-tz Europe/Paris            # CET/CEST
-tz Europe/Berlin           # CET/CEST
-
-# Asian Timezones
-tz Asia/Tokyo              # JST
-tz Asia/Shanghai           # CST
-tz Asia/Kolkata            # IST
-```
+Some common timezones you might use:
+- America/New_York (Eastern Time)
+- America/Chicago (Central Time)
+- America/Denver (Mountain Time)
+- America/Los_Angeles (Pacific Time)
+- Europe/London (GMT/BST)
+- Europe/Paris (CET/CEST)
+- Europe/Berlin (CET/CEST)
+- Asia/Tokyo (JST)
+- Asia/Shanghai (CST)
+- Asia/Kolkata (IST)
+- Australia/Sydney (AEST/AEDT)
 
 ## Features
 
+- 🌎 **Searchable timezone list** - All available timezones at your fingertips
+- 🔄 **Adaptive suggestions** - Most used timezones appear at the top
 - ✅ **Instant timezone switching** - No confirmation dialogs
 - 🔔 **Smart notifications** - Shows current date and time in new timezone
 - 🔐 **Secure** - Uses macOS admin authentication
 - ⚡ **Fast** - Direct system integration
-- 🎯 **Simple** - Just type `tz` and the timezone
+- 🎯 **Simple** - Just type `tz` and select a timezone
 
 ## Requirements
 
@@ -62,10 +58,13 @@ tz Asia/Kolkata            # IST
 
 The workflow uses macOS's built-in `systemsetup` command to change the system timezone. When you run the command:
 
-1. Alfred captures your timezone input
-2. The script requests admin privileges
-3. System timezone is updated instantly
-4. You get a notification with the current time in the new timezone
+1. Alfred displays a searchable list of all available timezones
+2. You select your desired timezone from the list
+3. The script requests admin privileges
+4. System timezone is updated instantly
+5. You get a notification with the current time in the new timezone
+
+Behind the scenes, the workflow uses JavaScript's `Intl.supportedValuesOf("timeZone")` to generate a complete list of all valid timezones on your system.
 
 ## Contributing
 

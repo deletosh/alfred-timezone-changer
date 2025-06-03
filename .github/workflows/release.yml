@@ -20,7 +20,15 @@ jobs:
           # Create temporary directory for workflow
           mkdir -p workflow_temp
           
-          # Create info.plist for Alfred workflow
+          # Copy ALL necessary files including icon
+          cp changer.sh workflow_temp/
+          cp list_timezones.js workflow_temp/
+          cp icon.png workflow_temp/
+          
+          # Make script executable
+          chmod +x workflow_temp/changer.sh
+          
+          # Create info.plist that references external script files (avoids escaping issues)
           cat > workflow_temp/info.plist << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -45,11 +53,24 @@ jobs:
                   <false/>
                 </dict>
               </array>
+              <key>2C3E5F6E-9D4E-5B3C-AF2F-4E6D8B0C3F5E</key>
+              <array>
+                <dict>
+                  <key>destinationuid</key>
+                  <string>3D4F6G7H-0E5F-6C4D-BG3G-5F7E9C1D4G6F</string>
+                  <key>modifiers</key>
+                  <integer>0</integer>
+                  <key>modifiersubtext</key>
+                  <string></string>
+                  <key>vitoclose</key>
+                  <false/>
+                </dict>
+              </array>
             </dict>
             <key>createdby</key>
             <string>deletosh</string>
             <key>description</key>
-            <string>Quickly change your Mac's timezone with notification feedback</string>
+            <string>Quickly change your Mac's timezone with a searchable list and instant notification feedback. Search by city, country, or timezone name for fast switching.</string>
             <key>disabled</key>
             <false/>
             <key>name</key>
@@ -59,23 +80,49 @@ jobs:
               <dict>
                 <key>config</key>
                 <dict>
-                  <key>argument</key>
+                  <key>alfredfiltersresults</key>
+                  <true/>
+                  <key>alfredfiltersresultsmatchmode</key>
+                  <integer>2</integer>
+                  <key>argumenttrimmode</key>
+                  <integer>0</integer>
+                  <key>argumenttype</key>
                   <integer>1</integer>
+                  <key>escaping</key>
+                  <integer>102</integer>
                   <key>keyword</key>
                   <string>tz</string>
+                  <key>queuedelaycustom</key>
+                  <integer>3</integer>
+                  <key>queuedelayimmediatelyinitially</key>
+                  <true/>
+                  <key>queuedelaymode</key>
+                  <integer>0</integer>
+                  <key>queuemode</key>
+                  <integer>1</integer>
+                  <key>runningsubtext</key>
+                  <string>Loading timezones...</string>
+                  <key>script</key>
+                  <string></string>
+                  <key>scriptargtype</key>
+                  <integer>1</integer>
+                  <key>scriptfile</key>
+                  <string>list_timezones.js</string>
                   <key>subtext</key>
-                  <string>e.g., America/New_York, Europe/London, Asia/Tokyo</string>
-                  <key>text</key>
+                  <string>Search and select a timezone to switch to</string>
+                  <key>title</key>
                   <string>Change Timezone</string>
+                  <key>type</key>
+                  <integer>5</integer>
                   <key>withspace</key>
                   <true/>
                 </dict>
                 <key>type</key>
-                <string>alfred.workflow.input.keyword</string>
+                <string>alfred.workflow.input.scriptfilter</string>
                 <key>uid</key>
                 <string>1B2F4E5E-8C3D-4A2B-9F1E-3D5C7A9B2E4F</string>
                 <key>version</key>
-                <integer>1</integer>
+                <integer>3</integer>
               </dict>
               <dict>
                 <key>config</key>
@@ -85,26 +132,11 @@ jobs:
                   <key>escaping</key>
                   <integer>102</integer>
                   <key>script</key>
-                  <string>#!/bin/bash
-          timezone="$1"
-          if [ -z "$timezone" ]; then
-              osascript -e "display notification \"Please provide a timezone\" with title \"Timezone Error\""
-              echo "Error: Please provide a timezone"
-              exit 1
-          fi
-          if osascript -e "do shell script \"sudo systemsetup -settimezone '$timezone'\" with administrator privileges" 2>/dev/null; then
-              current_time=$(date "+%I:%M %p %Z")
-              current_date=$(date "+%A, %B %d")
-              osascript -e "display notification \"$current_date at $current_time\" with title \"Timezone Changed\" subtitle \"Now in $timezone\""
-              echo "Timezone changed to $timezone"
-          else
-              osascript -e "display notification \"Invalid timezone or permission denied\" with title \"Timezone Error\""
-              echo "Failed to change timezone to $timezone"
-          fi</string>
+                  <string></string>
                   <key>scriptargtype</key>
                   <integer>1</integer>
                   <key>scriptfile</key>
-                  <string></string>
+                  <string>changer.sh</string>
                   <key>type</key>
                   <integer>0</integer>
                 </dict>
@@ -115,9 +147,79 @@ jobs:
                 <key>version</key>
                 <integer>2</integer>
               </dict>
+              <dict>
+                <key>config</key>
+                <dict>
+                  <key>lastpathcomponent</key>
+                  <false/>
+                  <key>onlyshowifquerypopulated</key>
+                  <true/>
+                  <key>removeextension</key>
+                  <false/>
+                  <key>text</key>
+                  <string>{query}</string>
+                  <key>title</key>
+                  <string>Quick Timezone Changer</string>
+                </dict>
+                <key>type</key>
+                <string>alfred.workflow.output.notification</string>
+                <key>uid</key>
+                <string>3D4F6G7H-0E5F-6C4D-BG3G-5F7E9C1D4G6F</string>
+                <key>version</key>
+                <integer>1</integer>
+              </dict>
             </array>
             <key>readme</key>
-            <string>Quick Timezone Changer for Alfred</string>
+            <string>## Quick Timezone Changer for Alfred
+
+**Version 1.1.0** | **Created by @deletosh**
+
+### Usage
+Type `tz` to open the searchable timezone list. Start typing to filter by city, country, or timezone name. Select any timezone to switch instantly with admin authentication.
+
+**Keyword:** `tz`
+
+### Examples
+- `tz new` → New York, New Delhi, Newark
+- `tz london` → Europe/London  
+- `tz tokyo` → Asia/Tokyo
+- `tz pacific` → America/Los_Angeles
+- `tz berlin` → Europe/Berlin
+
+### Features
+- 🌎 **Searchable timezone list** with smart filtering
+- 🔄 **Adaptive suggestions** - most used timezones bubble to the top
+- ✅ **Instant switching** with secure authentication
+- 🔔 **Rich notifications** with current time display
+- ⚡ **Fast performance** and simple interface
+- 🎯 **Keyboard shortcuts** - Alt to see full timezone name, Cmd to copy
+
+### Requirements
+- **macOS:** 10.14+ with administrator privileges
+- **Alfred:** 4+ with Powerpack license
+
+### Troubleshooting
+
+**Permission Denied Error:**
+Ensure you have administrator privileges and enter your admin password when prompted.
+
+**Timezone Not Found:**
+All timezones are from your system's available list. If missing, it may not be supported on your macOS version.
+
+**Notifications Not Showing:**
+Check System Preferences → Notifications → Alfred and ensure notifications are enabled.
+
+### Privacy &amp; Security
+- Only accesses system timezone settings
+- Requires explicit admin authentication for changes
+- No data collection or transmission
+- Uses standard macOS system commands only
+
+### Support
+**GitHub:** https://github.com/deletosh/alfred-timezone-changer
+**Issues:** https://github.com/deletosh/alfred-timezone-changer/issues
+
+**License:** MIT | **Developer:** @deletosh</string>
             <key>uidata</key>
             <dict>
               <key>1B2F4E5E-8C3D-4A2B-9F1E-3D5C7A9B2E4F</key>
@@ -134,18 +236,28 @@ jobs:
                 <key>ypos</key>
                 <integer>40</integer>
               </dict>
+              <key>3D4F6G7H-0E5F-6C4D-BG3G-5F7E9C1D4G6F</key>
+              <dict>
+                <key>xpos</key>
+                <integer>440</integer>
+                <key>ypos</key>
+                <integer>40</integer>
+              </dict>
             </dict>
             <key>version</key>
-            <string>1.0.0</string>
+            <string>1.1.0</string>
             <key>webaddress</key>
             <string>https://github.com/deletosh/alfred-timezone-changer</string>
           </dict>
-          </plist>
+#          </plist>
           EOF
+          
+          # Validate the plist
+          plutil -lint workflow_temp/info.plist
           
           # Create the .alfredworkflow file (it's just a zip with .alfredworkflow extension)
           cd workflow_temp
-          zip -r "../Quick-Timezone-Changer.alfredworkflow" ./*
+          zip -r "../Quick-Timezone-Changer.alfredworkflow" changer.sh list_timezones.js icon.png info.plist
           cd ..
           
           # Clean up
