@@ -1,0 +1,193 @@
+name: Build and Release Alfred Workflow
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Alfred Workflow
+        run: |
+          # Create temporary directory for workflow
+          mkdir -p workflow_temp
+          
+          # Copy the shell script
+          cp changer.sh workflow_temp/
+          
+          # Create info.plist for Alfred workflow
+          cat > workflow_temp/info.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>bundleid</key>
+            <string>com.deletosh.alfred-timezone-changer</string>
+            <key>category</key>
+            <string>Productivity</string>
+            <key>connections</key>
+            <dict>
+              <key>1B2F4E5E-8C3D-4A2B-9F1E-3D5C7A9B2E4F</key>
+              <array>
+                <dict>
+                  <key>destinationuid</key>
+                  <string>2C3E5F6E-9D4E-5B3C-AF2F-4E6D8B0C3F5E</string>
+                  <key>modifiers</key>
+                  <integer>0</integer>
+                  <key>modifiersubtext</key>
+                  <string></string>
+                  <key>vitoclose</key>
+                  <false/>
+                </dict>
+              </array>
+            </dict>
+            <key>createdby</key>
+            <string>deletosh</string>
+            <key>description</key>
+            <string>Quickly change your Mac's timezone with notification feedback</string>
+            <key>disabled</key>
+            <false/>
+            <key>name</key>
+            <string>Quick Timezone Changer</string>
+            <key>objects</key>
+            <array>
+              <dict>
+                <key>config</key>
+                <dict>
+                  <key>argument</key>
+                  <integer>1</integer>
+                  <key>keyword</key>
+                  <string>tz</string>
+                  <key>subtext</key>
+                  <string>e.g., America/New_York, Europe/London, Asia/Tokyo</string>
+                  <key>text</key>
+                  <string>Change Timezone</string>
+                  <key>withspace</key>
+                  <true/>
+                </dict>
+                <key>type</key>
+                <string>alfred.workflow.input.keyword</string>
+                <key>uid</key>
+                <string>1B2F4E5E-8C3D-4A2B-9F1E-3D5C7A9B2E4F</string>
+                <key>version</key>
+                <integer>1</integer>
+              </dict>
+              <dict>
+                <key>config</key>
+                <dict>
+                  <key>concurrently</key>
+                  <false/>
+                  <key>escaping</key>
+                  <integer>102</integer>
+                  <key>script</key>
+                  <string>#!/bin/bash
+
+  timezone="$1"
+  
+  if [ -z "$timezone" ]; then
+  osascript -e "display notification \"Please provide a timezone\" with title \"Timezone Error\""
+echo "❌ Error: Please provide a timezone"
+  exit 1
+  fi
+  
+  # Change timezone
+  if osascript -e "do shell script \"sudo systemsetup -settimezone '$timezone'\" with administrator privileges" 2>/dev/null; then
+  # Get current time for confirmation
+  current_time=$(date "+%I:%M %p %Z")
+  current_date=$(date "+%A, %B %d")
+  
+  # Show success notification
+  osascript -e "display notification \"$current_date at $current_time\" with title \"Timezone Changed\" subtitle \"Now in $timezone\""
+  
+  echo "✅ Timezone changed to $timezone"
+  else
+  # Handle errors
+  osascript -e "display notification \"Invalid timezone or permission denied\" with title \"Timezone Error\""
+  echo "❌ Failed to change timezone to $timezone"
+  fi</string>
+  <key>scriptargtype</key>
+  <integer>1</integer>
+  <key>scriptfile</key>
+  <string></string>
+  <key>type</key>
+  <integer>0</integer>
+  </dict>
+  <key>type</key>
+  <string>alfred.workflow.action.script</string>
+  <key>uid</key>
+  <string>2C3E5F6E-9D4E-5B3C-AF2F-4E6D8B0C3F5E</string>
+  <key>version</key>
+  <integer>2</integer>
+  </dict>
+  </array>
+  <key>readme</key>
+  <string>Quick Timezone Changer for Alfred
+
+Usage: tz [timezone]
+Examples:
+  - tz America/New_York
+  - tz Europe/London
+  - tz Asia/Tokyo
+
+Features:
+  - Instant timezone switching
+  - macOS notification feedback
+  - No confirmation dialogs
+  - Admin password prompt when needed</string>
+      <key>uidata</key>
+      <dict>
+      <key>1B2F4E5E-8C3D-4A2B-9F1E-3D5C7A9B2E4F</key>
+      <dict>
+      <key>xpos</key>
+      <integer>40</integer>
+      <key>ypos</key>
+      <integer>40</integer>
+      </dict>
+      <key>2C3E5F6E-9D4E-5B3C-AF2F-4E6D8B0C3F5E</key>
+      <dict>
+      <key>xpos</key>
+      <integer>240</integer>
+      <key>ypos</key>
+      <integer>40</integer>
+      </dict>
+      </dict>
+      <key>version</key>
+      <string>1.0.0</string>
+      <key>webaddress</key>
+      <string>https://github.com/deletosh/alfred-timezone-changer</string>
+      </dict>
+      </plist>
+      EOF
+    
+    # Create the .alfredworkflow file (it's just a zip with .alfredworkflow extension)
+      cd workflow_temp
+      zip -r "../Quick-Timezone-Changer.alfredworkflow" ./*
+      cd ..
+    
+    # Clean up
+      rm -rf workflow_temp
+      
+      - name: Upload workflow as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: alfred-workflow
+        path: Quick-Timezone-Changer.alfredworkflow
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Quick-Timezone-Changer.alfredworkflow
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
