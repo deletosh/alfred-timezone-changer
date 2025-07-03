@@ -6,7 +6,7 @@ Quickly change your Mac's timezone with a simple Alfred command and get instant 
 
 ## Download
 
-**[⬇️ Download Latest Release](https://github.com/deletosh/alfred-timezone-changer/releases/latest/download/Quick-Timezone-Changer.alfredworkflow)**
+**[⬇️ Download Latest Release](https://github.com/deletosh/alfred-timezone-changer/raw/refs/heads/main/Quick%20Timezone%20Changer.alfredworkflow)**
 
 ## Installation
 
