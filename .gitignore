@@ -29,7 +29,7 @@ Temporary Items
 .apdisk
 
 # Build artifacts
-*.alfredworkflow
+#*.alfredworkflow
 workflow_temp/
 simple_test/
 
